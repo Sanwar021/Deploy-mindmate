@@ -278,8 +278,14 @@ export default function Login({ api, onAuth }) {
       <section
         className="brand-panel"
         aria-label="About MindMate"
-        style={{ backgroundImage: `url(${heroArt})` }}
       >
+        <img
+          src={heroArt}
+          alt=""
+          aria-hidden="true"
+          className="brand-hero-img"
+          decoding="async"
+        />
         <div className="brand-scrim" aria-hidden="true" />
 
         <div className="brand-top">
