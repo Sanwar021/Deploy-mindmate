@@ -1,3 +1,4 @@
+node_modules/
 software/node_modules/
 software/dist/
 software/.env

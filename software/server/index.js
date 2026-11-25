@@ -3,6 +3,7 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scoreAssessment, detectRisk, crisisReply } from './scoring.js';
@@ -13,7 +14,7 @@ import { authenticatePasskey, validateRegistration } from './auth.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const isVercel = Boolean(process.env.VERCEL);
-const dataFile = isVercel ? path.join('/tmp', 'mindmate.json') : path.join(here, 'data', 'mindmate.json');
+const dataFile = isVercel ? path.join(os.tmpdir(), 'mindmate.json') : path.join(here, 'data', 'mindmate.json');
 const secret = process.env.JWT_SECRET || 'local-development-secret-change-me';
 const port = Number(process.env.PORT || 8080);
 function pilotSeed() {
@@ -62,7 +63,11 @@ async function seed() {
 await seed();
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || true }));
-app.use(express.json({ limit: '6mb' }));
+const jsonParser = express.json({ limit: '6mb' });
+app.use((req, res, next) => {
+  if (req.body !== undefined) return next();
+  return jsonParser(req, res, next);
+});
 const publicUser = u => ({ id: u.id, name: u.name, email: u.email, role: u.role });
 const tokenFor = u => jwt.sign({ id: u.id, role: u.role }, secret, { expiresIn: '8h' });
 function auth(req, res, next) { try { req.auth = jwt.verify((req.headers.authorization || '').replace('Bearer ', ''), secret); next(); } catch { res.status(401).json({ error: 'Please sign in again.' }); } }

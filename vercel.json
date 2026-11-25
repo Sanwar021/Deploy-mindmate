@@ -1,14 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd software && npm install",
+  "installCommand": "npm install && cd software && npm install",
   "buildCommand": "cd software && npm run build",
   "outputDirectory": "software/dist",
   "functions": {
-    "api/[...path].mjs": {
+    "api/index.mjs": {
       "includeFiles": "{software/server/**,pilot/real-results/**}"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.mjs?__path=$1"
+    },
     {
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
